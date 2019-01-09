@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Room</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body onload="Username()">
+<h1 id="helloyou">Hello Guest!</h1>
+<div id="Showlabel" style="margin-bottom: 5px;border: 2px solid black;width: 800px;height:300px;overflow-y: scroll"></div>
+<input type="text" style="border: 2px solid black;width: 800px;height:18px;font-size: 18px" id="Enterspace">
+<input type="button" value="Enter" style="height: 25px;width: 70px" onclick="enter()">
+<input type ="button" onclick="history.back()" value="Back"style="height: 25px;width: 70px">
+<script>
+    var visitname = "Guest";
+	var name = "Guest";
+    var showlabel = document.getElementById("Showlabel");
+    var socket = io.connect();
+    var chatbool=0;
+    var chatrambool=0;
+    var chatinram="";
+    var chatram="";
+    socket.on('return', function(data){
+        chatram = data.return;
+        if(chatbool==0){
+            chatinram = data.return;
+            chatbool=1;
+        }
+        if(chatinram==chatram&&chatrambool==0){
+            if(data.return=="Server will close in 5 second...<br>"){
+                showlabel.innerHTML += data.return;
+                setTimeout(function () {
+                    showlabel.innerHTML += "Server is Closed!<br>"
+                },5000)
+            }
+            else {showlabel.innerHTML += data.return;}
+            showlabel.scrollTop = showlabel.scrollHeight;
+            chatrambool=1;
+        }
+        if(chatram!=chatinram){
+            chatbool=0;
+            chatrambool=0;
+        }
+
+    });
+
+    function enter() {
+        var enterspace = document.getElementById("Enterspace");
+        socket.emit('clientmessage', {
+            'letter': name+":"+enterspace.value
+        });
+        enterspace.value = "";
+    }
+    function keyFunction() {
+        if (event.keyCode==13) {
+            var enterspace = document.getElementById("Enterspace");
+            socket.emit('clientmessage', {
+                'letter': name+":"+enterspace.value
+            });
+            enterspace.value = "";
+        }
+    }
+	
+	function Username()
+	{
+		var pass = location.search.substring(1).split("&");
+	
+		var temp = pass[0].split("=");
+		name = unescape(temp[1]);
+		temp = pass[1].split("=");
+		p = unescape(temp[1]);
+		document.getElementById("helloyou").innerHTML = "Hello " + name + "!";;
+	}
+	
+    document.onkeydown=keyFunction;
+</script>
+</body>
+</html>

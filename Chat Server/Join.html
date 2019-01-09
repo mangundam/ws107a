@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Join Chat</title>
+</head>
+<body>
+<div style="margin: 0 auto;width: 600px;height: 300px">
+  <div style="margin:50px 250px auto 250px">
+    <h3 style="text-align: center">IP</h3>
+    <input type="url" value="127.0.0.1" id="urlIP" style="width: 100px;text-align: center">
+  </div>
+  <div style="margin:5px 260px auto 260px">
+    <h3 style="text-align: center">PORT</h3>
+    <input type="number" value="8001" id="urlPORT"style="width: 80px;text-align: center">
+  </div>
+  <div style="margin:5px 200px auto 200px">
+    <h3 style="text-align: center ;width: 200px;">Your Name</h3>
+  </div>
+  <div style="margin:5px 260px auto 260px">
+	<form method="get" action="Chat.html" id="actio">
+        <input type="text" name="user" value="Guest" id="username" style="width: 80px;text-align: center">
+		<input type="submit" name="submit" value="Enter" onclick="sumb()" style="width: 120px;height: 30px;margin: 15px 0px auto -20px">
+	</form>
+  </div>
+  <input type ="button" onclick="history.back()" value="Back"style="height: 25px;width: 70px">
+  <h3 id="namealert" style="text-align: center;font-size: 18px;height: 18px"></h3>
+</div>
+<script>
+  
+  function sumb(){
+	var roomurl;
+	var act = document.getElementById("actio");
+    var ip = document.getElementById("urlIP");
+    var port = document.getElementById("urlPORT");
+    var username = document.getElementById("username");
+    var namealert = document.getElementById("namealert");
+    if(username.value=="Server"){
+      namealert.innerHTML = "can not use 'Server' to be your name!"
+    }
+    else {
+      roomurl = ip.value +":"+ port.value;
+      actio.action="http://"+roomurl+"/Chat.html";
+    }
+  }
+
+  function keyFunction() {
+    if (event.keyCode==13) {
+      	var roomurl;
+	var act = document.getElementById("actio");
+    var ip = document.getElementById("urlIP");
+    var port = document.getElementById("urlPORT");
+    var username = document.getElementById("username");
+    var namealert = document.getElementById("namealert");
+    if(username.value=="Server"){
+      namealert.innerHTML = "can not use 'Server' to be your name!"
+    }
+    else {
+      roomurl = ip.value +":"+ port.value;
+      actio.action="http://"+roomurl+"/Chat.html";
+      }
+    }
+  }
+  document.onkeydown=keyFunction;
+</script>
+</body>
+</html>

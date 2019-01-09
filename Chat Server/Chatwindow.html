@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body onload="loadname()">
+<h1 id="helloyou">Hello </h1>
+<div id="Showlabel" style="margin-bottom: 5px;border: 2px solid black;width: 800px;height:300px;overflow-y: scroll"></div>
+<input type="text" style="border: 2px solid black;width: 800px;height:18px;font-size: 18px" id="Enterspace">
+<input type="button" value="Enter" style="height: 20px;width: 60px" onclick="enter()">
+<script>
+    var visitname = "";
+    function loadname() {
+        const fs = require('fs');
+        var hello = document.getElementById("helloyou");
+        fs.readFile("temp".toString(), 'utf8', function (err, data) {
+            visitname = data;
+            if(visitname==undefined){visitname="Guest";}
+            hello.innerHTML += visitname +"!";
+        })
+        fs.unlink('temp');
+    }
+
+    var showlabel = document.getElementById("Showlabel");
+    var socket = io.connect();
+    var chatbool=0;
+    var chatrambool=0;
+    var chatinram="";
+    var chatram="";
+    socket.on('return', function(data){
+        chatram = data.return;
+        if(chatbool==0){
+            chatinram = data.return;
+            chatbool=1;
+        }
+        if(chatinram==chatram&&chatrambool==0){
+            showlabel.innerHTML += data.return;
+            showlabel.scrollTop = showlabel.scrollHeight;
+            chatrambool=1;
+        }
+        if(chatram!=chatinram){
+            chatbool=0;
+            chatrambool=0;
+        }
+
+    });
+
+    function enter() {
+        var enterspace = document.getElementById("Enterspace");
+        socket.emit('clientmessage', {
+            'letter': visitname+":"+enterspace.value
+        });
+        enterspace.value = "";
+    }
+    function keyFunction() {
+        if (event.keyCode==13) {
+            var enterspace = document.getElementById("Enterspace");
+            socket.emit('clientmessage', {
+                'letter': visitname+":"+enterspace.value
+            });
+            enterspace.value = "";
+        }
+    }
+    document.onkeydown=keyFunction;
+</script>
+</body>
+</html>

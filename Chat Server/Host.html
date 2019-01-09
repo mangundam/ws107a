@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Server Host</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body onload="chatrecord()">
+    <h1>Hello World!</h1>
+    <div>
+    <h3 id="inport">輸入port</h3>
+    <input type="number" id="inputport" value="8001">
+    <input type="button" value="Open Server" onclick="serveroption()">
+    <input type="button" value="Close Server" onclick="closeServer()">
+    <br>
+    </div>
+    <br>
+    <div id="Showlabel" style="margin-bottom: 5px;border: 2px solid black;width: 800px;height:300px;overflow-y: scroll"></div>
+    <input type="text" style="border: 2px solid black;width: 800px;height:18px;font-size: 18px" id="Enterspace">
+    <input type="button" value="Enter" style="height: 25px;width: 70px" onclick="enter()">
+	<input type ="button" onclick="location.href='Home.html'" value="Back"style="height: 25px;width: 70px">
+    <script>
+        var server;
+        var http = require('http');
+        var showlabel = document.getElementById("Showlabel");
+        var port = document.getElementById("inputport");
+        var url = require('url');
+        var fs = require('fs');
+        var io = require('socket.io');
+        var serv_io;
+        var chatram="";
+        var chatinram="";
+        var serverbool=0;
+        var path;
+        var socketlist = [];
+        function enter(){
+          if(serverbool==1){
+          var enterspace = document.getElementById("Enterspace");
+          chatinram = showlabel.innerHTML;
+          showlabel.innerHTML += "Server:"+enterspace.value + "<br>";
+          showlabel.scrollTop = showlabel.scrollHeight;
+          chatram = showlabel.innerHTML.replace(chatinram,"");
+          enterspace.value = "";
+		  socket.emit('return', {'return': chatram});
+		  }
+          else {
+            alert("No working Server")
+          }
+        }
+        function keyFunction() {
+          if (event.keyCode==13) {
+            if(serverbool==1){
+            var enterspace = document.getElementById("Enterspace");
+            chatinram = showlabel.innerHTML;
+            showlabel.innerHTML += "Server:"+enterspace.value + "<br>";
+            showlabel.scrollTop = showlabel.scrollHeight;
+            chatram = showlabel.innerHTML.replace(chatinram,"");
+            enterspace.value = "";
+			socket.emit('return', {'return': chatram});
+          }
+            else {
+              alert("No working Server")
+            }
+          }
+        }
+
+        function closeServer(){
+          chatinram = showlabel.innerHTML;
+          showlabel.innerHTML += "Server will close in 5 second...<br>";
+          showlabel.scrollTop = showlabel.scrollHeight;
+          chatram = showlabel.innerHTML.replace(chatinram,"");
+          setTimeout(function () {
+			localStorage.setItem("port",port.value);
+			localStorage.setItem("Showlabel",showlabel.innerHTML);
+            window.location.href="Host.html";
+          },4000)
+
+        }
+        function chatrecord() {
+			if (localStorage.getItem("Showlabel") === null) {
+					showlabel.innerHTML = "";
+			}
+			else{
+				showlabel.innerHTML = localStorage.getItem("Showlabel");
+				showlabel.innerHTML += "Server is Closed!<br>"
+			}
+			if (localStorage.getItem("port") === null) {
+					port.value = 8001;
+			}
+			else{
+				port.value = localStorage.getItem("port");
+			}
+        }
+        document.onkeydown=keyFunction;
+         function  serveroption() {
+           serverbool=1;
+           showlabel.innerHTML += "Server is on<br>";
+          server = http.createServer(function (request, response) {
+            showlabel.innerHTML += "New Connection!<br>";
+            showlabel.scrollTop = showlabel.scrollHeight;
+            path = url.parse(request.url).pathname;
+            switch (path) {
+              case '/':
+                response.writeHead(200, {'Content-Type': 'text/html'});
+                response.write("Hello, Please add '/Chatwindow.html' to your Url's end");
+                response.end();
+                break;
+              case '/Join.html':
+                fs.readFile(__dirname + path, function(error, data) {
+                    response.writeHead(200, {"Content-Type": "text/html"});
+                    response.write(data, "utf8");
+                  response.end();
+                });
+                break;
+			  case '/Chat.html':
+                fs.readFile(__dirname + path, function(error, data) {
+                    response.writeHead(200, {"Content-Type": "text/html"});
+                    response.write(data, "utf8");
+                  response.end();
+                });
+				break;
+              default:
+                response.writeHead(404);
+                response.write("opps this doesn't exist - 404");
+                response.end();
+                break;
+            }
+          });
+          server.listen(port.value);
+           io.listen(server);
+           serv_io = io.listen(server);
+           serv_io.sockets.on('connection', function(socket) {
+             socketlist.push(socket);
+             socket.on('clientmessage', function(data) {
+               chatinram = showlabel.innerHTML;
+               showlabel.innerHTML += data.letter + "<br>";
+               showlabel.scrollTop = showlabel.scrollHeight;
+               chatram = showlabel.innerHTML.replace(chatinram,"");
+			   socket.emit('return', {'return': chatram});
+             });
+             /*setInterval(function() {
+               socket.emit('return', {'return': chatram});
+             }, 100);*/
+           });
+        }
+
+
+    </script>
+    <script>
+      // You can also require other files to run in this process
+      require('./renderer.js')
+    </script>
+  </body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+  </head>
+  <body>
+    <h1>Hello World!</h1>
+    <h3 id="inport">輸入port</h3>
+    <input type="number" id="inputport" value="8001">
+    <input type="button" value="Open Server" onclick="serveroption()">
+    <input type="button" value="Close Server" onclick="closeserver()">
+    <br>
+    <div id="Showlabel" style="margin-bottom: 5px;border: 2px solid black;width: 800px;height:300px;overflow-y: scroll"></div>
+    <input type="text" style="border: 2px solid black;width: 800px;height:18px;font-size: 18px">
+    <input type="button" value="Enter" style="height: 20px;width: 60px">
+    <script>
+        var server;
+        var http = require('http');
+        var showlabel = document.getElementById("Showlabel");
+        var port = document.getElementById("inputport");
+        var url = require('url');
+        var fs = require('fs');
+        var io = require('socket.io');
+        var serv_io;
+        var chatram="";
+        var chatinram="";
+        //var socketlist = [];
+         function  serveroption() {
+           showlabel.innerHTML += "Server is on<br>";
+          server = http.createServer(function (request, response) {
+            showlabel.innerHTML += "Connection<br>";
+            showlabel.scrollTop = showlabel.scrollHeight;
+            var path = url.parse(request.url).pathname;
+            switch (path) {
+              case '/':
+                response.writeHead(200, {'Content-Type': 'text/html'});
+                response.write("Hello, Please add '/Chatwindow.html' to your Url's end");
+                response.end();
+                break;
+              case '/Chatwindow.html':
+                fs.readFile(__dirname + path, function(error, data) {
+                    response.writeHead(200, {"Content-Type": "text/html"});
+                    response.write(data, "utf8");
+                  response.end();
+                });
+                break;
+              default:
+                response.writeHead(404);
+                response.write("opps this doesn't exist - 404");
+                response.end();
+                break;
+            }
+          });
+          server.listen(port.value);
+           io.listen(server);
+           serv_io = io.listen(server);
+           serv_io.sockets.on('connection', function(socket) {
+
+
+             socket.on('clientmessage', function(data) {
+               chatinram = showlabel.innerHTML;
+               showlabel.innerHTML += data.letter + "<br>";
+               showlabel.scrollTop = showlabel.scrollHeight;
+               chatram = showlabel.innerHTML.replace(chatinram,"");
+             });
+
+             setInterval(function() {
+               socket.emit('return', {'return': chatram});
+             }, 10);
+
+           });
+
+
+
+
+        }
+        /*function closeserver() {
+          socketlist.forEach(function(socket){
+            socket.destroy();
+          });
+          server.close(function(){
+            console.log("close server!");
+          });
+          }*/
+    </script>
+    <script>
+      // You can also require other files to run in this process
+      require('./renderer.js')
+    </script>
+  </body>
+</html>
